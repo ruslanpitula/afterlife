@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import '../theme/app_theme.dart';
+import '../utils/env_config.dart';
 
 class ModelSelectionDialog extends StatefulWidget {
   final String currentModel;
@@ -16,9 +17,13 @@ class ModelSelectionDialog extends StatefulWidget {
     BuildContext context, {
     required String currentModel,
   }) async {
-    // iOS: Hide dialog and return Apple Intelligence id directly
+    // iOS: If cloud not enabled or no API key, return Apple Intelligence id directly
     if (Platform.isIOS) {
-      return 'local/apple-intelligence';
+      final cloudEnabled = await EnvConfig.isCloudAiEnabled();
+      final hasKey = await EnvConfig.hasUserApiKey();
+      if (!(cloudEnabled && hasKey)) {
+        return 'local/apple-intelligence';
+      }
     }
     return await showDialog<String>(
       context: context,
@@ -41,7 +46,7 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
 
   // List of available models
   // You can expand this list as needed
-  final List<Map<String, dynamic>> _availableModels = Platform.isIOS
+  late final List<Map<String, dynamic>> _availableModels = Platform.isIOS
       ? [
           {
             'id': 'local/apple-intelligence',
@@ -51,6 +56,37 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
             'recommended': true,
             'isLocal': true,
           },
+          // If cloud is enabled and API key exists, also show top cloud models
+          if (EnvConfig.isCloudAiEnabledCached()) ...[
+            {
+              'id': 'anthropic/claude-sonnet-4',
+              'name': 'Claude 4 Sonnet',
+              'provider': 'Anthropic',
+              'description': 'Latest Claude with enhanced reasoning and capabilities.',
+              'recommended': true,
+            },
+            {
+              'id': 'openai/gpt-5-chat',
+              'name': 'GPT-5 Chat',
+              'provider': 'OpenAI',
+              'description': 'Long-context, strong reasoning and coding. Via OpenRouter.',
+              'recommended': false,
+            },
+            {
+              'id': 'google/gemini-2.5-pro',
+              'name': 'Gemini 2.5 Pro',
+              'provider': 'Google',
+              'description': 'Fast, high-quality responses with strong multimodal support.',
+              'recommended': true,
+            },
+            {
+              'id': 'meta-llama/llama-4-maverick',
+              'name': 'Llama 4 Maverick',
+              'provider': 'Meta',
+              'description': 'Sparse mixture-of-experts, extended context.',
+              'recommended': false,
+            },
+          ]
         ]
       : [
     {
@@ -84,21 +120,13 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       'recommended': false,
     },
     {
-      'id': 'anthropic/claude-3-opus',
-      'name': 'Claude 3 Opus',
-      'provider': 'Anthropic',
-      'description': 'Top-tier intelligence, but slower and more expensive.',
-      'recommended': false,
-    },
-    {
-      'id': 'meta-llama/llama-3-70b-instruct',
-      'name': 'Llama 3 70B',
+      'id': 'meta-llama/llama-4-maverick',
+      'name': 'Llama 4 Maverick',
       'provider': 'Meta',
-      'description': 'Open-source model with good all-around capabilities.',
+      'description': 'Sparse mixture-of-experts, extended context.',
       'recommended': false,
     },
-    // Keep free model(s) separate elsewhere
-      ];
+  ];
 
   @override
   void initState() {
@@ -209,60 +237,21 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
                                             'RECOMMENDED',
                                             style: TextStyle(
                                               color: AppTheme.warmGold,
-                                              fontSize: 10,
                                               fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      if (model['isLocal'] == true)
-                                        Container(
-                                          margin: const EdgeInsets.only(left: 4),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 2,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue.withValues(alpha: 0.2),
-                                            borderRadius: BorderRadius.circular(4),
-                                          ),
-                                          child: Text(
-                                            'PRIVATE',
-                                            style: TextStyle(
-                                              color: Colors.blue,
                                               fontSize: 10,
-                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'by ${model['provider']}',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 8),
                                   Text(
                                     model['description'],
                                     style: TextStyle(
                                       color: Colors.white70,
-                                      fontSize: 14,
+                                      fontSize: 13,
                                     ),
                                   ),
-                                  if (model['isLocal'] == true) ...[
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Requires model download • No internet needed',
-                                      style: TextStyle(
-                                        color: Colors.blue.withValues(alpha: 0.8),
-                                        fontSize: 12,
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),
@@ -280,14 +269,12 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('CANCEL', style: TextStyle(color: Colors.white70)),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
         ),
         ElevatedButton(
-          onPressed: () {
-            widget.onModelSelected(_selectedModel);
-          },
+          onPressed: () => widget.onModelSelected(_selectedModel),
           style: ElevatedButton.styleFrom(backgroundColor: AppTheme.warmGold),
-          child: Text('SELECT', style: TextStyle(color: Colors.black)),
+          child: const Text('Select'),
         ),
       ],
     );

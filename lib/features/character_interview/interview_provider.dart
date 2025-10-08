@@ -72,6 +72,34 @@ class InterviewProvider with ChangeNotifier {
     }
   }
 
+  /// Replace the existing welcome message when the user toggles modes,
+  /// but only if the user hasn't typed anything yet and the interview
+  /// hasn't progressed.
+  void setOrReplaceInitialMessage(String message) {
+    _initialMessage = message;
+    if (isEditMode || isComplete || isSuccess) return;
+    // Don't change if user has already replied
+    final hasUserMessage = _messages.any((m) => m.isUser);
+    if (hasUserMessage) return;
+
+    // If no initial message was added yet, add it now
+    if (!_initialMessageAdded) {
+      addAIMessage(_initialMessage!);
+      _initialMessageAdded = true;
+      return;
+    }
+
+    // Replace the first non-loading AI message
+    final idx = _messages.indexWhere((m) => !m.isUser && !m.isLoading);
+    if (idx >= 0) {
+      _messages[idx] = Message(text: _initialMessage!, isUser: false);
+      notifyListeners();
+    } else {
+      addAIMessage(_initialMessage!);
+      _initialMessageAdded = true;
+    }
+  }
+
   Future<void> _addInitialMessage() async {
     // This method is now only used as a fallback if setInitialMessage wasn't called
     if (!isEditMode && !_initialMessageAdded) {

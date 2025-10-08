@@ -5,6 +5,7 @@ import 'package:afterlife/core/services/local_llm_service.dart';
 import 'package:afterlife/core/services/native_ios_ai.dart';
 import 'package:flutter/services.dart';
 import 'preferences_service.dart';
+import '../utils/env_config.dart';
 import '../utils/app_logger.dart';
 import '../../features/character_interview/chat_service.dart' as interview_chat;
 import '../../features/character_chat/chat_service.dart' as character_chat;
@@ -207,21 +208,28 @@ Guidelines:
       } catch (_) {}
     }
 
-    // iOS: Force on-device Apple Foundation Models for all chats
+    // iOS: Prefer local, but allow cloud when explicitly enabled and API key is present
     if (Platform.isIOS) {
-      // Always adapt prompt for local execution: prefer concise style
-      String? adjustedSystemPrompt = systemPrompt;
-      if ((adjustedSystemPrompt ?? '').isNotEmpty) {
-        adjustedSystemPrompt = adjustedSystemPrompt! + "\n\n" + _localStyleGuide;
-      } else {
-        adjustedSystemPrompt = _localStyleGuide;
+      final cloudAllowed = await EnvConfig.isCloudAiEnabled();
+      final hasApiKey = await EnvConfig.hasUserApiKey();
+      final preferLocal = preferredProvider == LLMProvider.local;
+
+      if (!(cloudAllowed && hasApiKey) || preferLocal) {
+        // Adapt prompt for local execution and route to on-device model
+        String? adjustedSystemPrompt = systemPrompt;
+        if ((adjustedSystemPrompt ?? '').isNotEmpty) {
+          adjustedSystemPrompt = adjustedSystemPrompt! + "\n\n" + _localStyleGuide;
+        } else {
+          adjustedSystemPrompt = _localStyleGuide;
+        }
+        return await _sendMessageLocal(
+          messages: messages,
+          systemPrompt: adjustedSystemPrompt,
+          temperature: temperature,
+          maxTokens: maxTokens,
+        );
       }
-      return await _sendMessageLocal(
-        messages: messages,
-        systemPrompt: adjustedSystemPrompt,
-        temperature: temperature,
-        maxTokens: maxTokens,
-      );
+      // Else continue to provider selection below (permits OpenRouter)
     }
 
     // Use the explicitly provided provider when set; otherwise auto-determine
@@ -324,8 +332,14 @@ Guidelines:
     // Determine the provider based on the model
     LLMProvider actualProvider;
     if (Platform.isIOS) {
-      // On iOS, always use local (Apple FM)
-      actualProvider = LLMProvider.local;
+      // On iOS, allow cloud only if user enabled it and API key is present
+      final cloudAllowed = await EnvConfig.isCloudAiEnabled();
+      final hasApiKey = await EnvConfig.hasUserApiKey();
+      if (cloudAllowed && hasApiKey && !isLocalModel) {
+        actualProvider = LLMProvider.openRouter;
+      } else {
+        actualProvider = LLMProvider.local;
+      }
     } else if (isLocalModel) {
       actualProvider = LLMProvider.local;
     } else if (preferredProvider != null) {

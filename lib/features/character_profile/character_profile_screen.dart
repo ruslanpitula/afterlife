@@ -14,6 +14,7 @@ import '../../core/widgets/model_selection_dialog.dart';
 import '../character_chat/chat_screen.dart';
 import '../../core/utils/responsive_utils.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/env_config.dart';
 
 // Helper class to store parsed prompt sections
 class _PromptSection {
@@ -599,7 +600,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
         ? mc['fileSizeGB'].toString()
         : '1.3';
 
-    // Define the models card. On iOS, show only Apple Intelligence option.
+    // Define the models card. On iOS, show Apple Intelligence, and if Cloud AI is enabled, also show two API models.
     final bool isiOS = Theme.of(context).platform == TargetPlatform.iOS;
     final models = isiOS
         ? [
@@ -611,6 +612,37 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               'recommended': true,
               'isLocal': true,
             },
+            if (EnvConfig.isCloudAiEnabledCached()) ...[
+              {
+                'id': 'anthropic/claude-sonnet-4',
+                'name': 'Claude 4 Sonnet',
+                'description': 'Latest Claude with enhanced reasoning and capabilities.',
+                'provider': 'Anthropic (Cloud via OpenRouter)',
+                'recommended': false,
+              },
+              {
+                'id': 'openai/gpt-5-chat',
+                'name': 'GPT-5 Chat',
+                'description': 'Long-context, strong reasoning and coding. Via OpenRouter.',
+                'provider': 'OpenAI (Cloud via OpenRouter)',
+                'recommended': false,
+              },
+              {
+                'id': 'google/gemini-2.5-pro',
+                'name': 'Gemini 2.5 Pro',
+                'description': localizations.speedMultimodalSupport,
+                'provider': 'Google (Cloud via OpenRouter)',
+                'recommended': false,
+              },
+              {
+                'id': 'deepseek/deepseek-chat-v3.1:free',
+                'name': 'DeepSeek Chat v3.1 (Free)',
+                'description': 'Free model with solid conversational abilities',
+                'provider': 'DeepSeek (Cloud via OpenRouter)',
+                'free': true,
+                'recommended': false,
+              },
+            ]
           ]
         : [
             // Android keeps existing options
@@ -728,26 +760,29 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Icon(
                       isLocal ? Icons.phone_android : Icons.cloud,
                       size: 20,
                       color: isLocal ? Colors.green : AppTheme.warmGold,
                     ),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     if (!Platform.isIOS && isRecommended)
                       Container(
+                        margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: AppTheme.warmGold.withValues(alpha: 0.2),
@@ -764,6 +799,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                       ),
                     if (isFree)
                       Container(
+                        margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.green.withValues(alpha: 0.2),
@@ -778,9 +814,9 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
                           ),
                         ),
                       ),
-                    // Hide PRIVATE pill on iOS to avoid clutter
                     if (!Platform.isIOS && isLocal)
                       Container(
+                        margin: const EdgeInsets.only(left: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.blue.withValues(alpha: 0.2),

@@ -9,6 +9,7 @@ import '../../../core/widgets/api_key_input_dialog.dart';
 import 'dart:io' show Platform;
 import '../../settings/local_llm_settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/env_config.dart';
 
 class SetupGuidePage extends StatelessWidget {
   final AnimationController animationController;
@@ -294,7 +295,7 @@ class SetupGuidePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Local/On-device option: show only on Android to avoid iOS duplication
+                      // Local/On-device option
                       if (!Platform.isIOS)
                         _buildOptionCard(
                           context,
@@ -324,8 +325,8 @@ class SetupGuidePage extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Cloud AI Option hidden on iOS
-                      if (!Platform.isIOS)
+                      // Cloud AI Option (on iOS, show only when user enabled Cloud AI)
+                      if (!Platform.isIOS || EnvConfig.isCloudAiEnabledCached())
                         _buildOptionCard(
                           context,
                           title: l10n.cloudAiModels,
@@ -361,6 +362,22 @@ class SetupGuidePage extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
                                 ),
                               ],
+                            ),
+                          ),
+                        ),
+
+                      // iOS helper card when Cloud AI is disabled
+                      if (Platform.isIOS && !EnvConfig.isCloudAiEnabledCached())
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'To use advanced cloud models, enable Cloud AI (OpenRouter) and add your API key in Settings.',
+                            textAlign: TextAlign.center,
+                            style: UkrainianFontUtils.latoWithUkrainianSupport(
+                              text:
+                                  'To use advanced cloud models, enable Cloud AI (OpenRouter) and add your API key in Settings.',
+                              color: AppTheme.silverMist.withValues(alpha: 0.8),
+                              fontSize: 12,
                             ),
                           ),
                         ),
