@@ -244,7 +244,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
                     const SizedBox(height: 16),
 
-                    // API & Connectivity section (hidden on iOS for Apple Intelligence‑only setup)
+                    // API & Connectivity section
                     if (!Platform.isIOS) ...[
                       _buildSectionHeader(localizations.apiConnectivity),
                       _buildSettingCard(
@@ -253,6 +253,59 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                         icon: Icons.vpn_key,
                         onTap: () => _showApiKeyDialog(context),
                       ),
+                      _buildSettingCard(
+                        title: localizations.localAiSettings,
+                        subtitle: localizations.localAiSettingsDescription,
+                        icon: Icons.offline_bolt,
+                        onTap: () => _navigateToLocalLLMSettings(context),
+                      ),
+                    ] else ...[
+                      _buildSectionHeader(localizations.apiConnectivity),
+                      // iOS: Cloud AI enable switch and API key entry
+                      Card(
+                        elevation: 0,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(
+                            color: AppTheme.warmGold.withValues(alpha: 0.3),
+                            width: 1,
+                          ),
+                        ),
+                        color: AppTheme.midnightPurple.withValues(alpha: 0.5),
+                        child: SwitchListTile.adaptive(
+                          value: EnvConfig.isCloudAiEnabledCached(),
+                          onChanged: (v) async {
+                            await EnvConfig.setCloudAiEnabled(v);
+                            setState(() {});
+                          },
+                          title: Text(
+                            localizations.enableCloudAi,
+                            style: UkrainianFontUtils.latoWithUkrainianSupport(
+                              text: localizations.enableCloudAi,
+                              color: AppTheme.silverMist,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            localizations.enableCloudAiSubtitle,
+                            style: UkrainianFontUtils.latoWithUkrainianSupport(
+                              text: localizations.enableCloudAiSubtitle,
+                              color: AppTheme.silverMist.withValues(alpha: 0.7),
+                              fontSize: 13,
+                            ),
+                          ),
+                          activeColor: AppTheme.warmGold,
+                        ),
+                      ),
+                      if (EnvConfig.isCloudAiEnabledCached())
+                        _buildSettingCard(
+                          title: 'OpenRouter API Key',
+                          subtitle: localizations.customApiKeyDescription,
+                          icon: Icons.vpn_key,
+                          onTap: () => _showApiKeyDialog(context),
+                        ),
                       _buildSettingCard(
                         title: localizations.localAiSettings,
                         subtitle: localizations.localAiSettingsDescription,

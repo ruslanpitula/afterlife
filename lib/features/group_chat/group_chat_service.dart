@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 import '../../core/services/hybrid_chat_service.dart';
+import '../../core/utils/env_config.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/services/preferences_service.dart';
 import '../models/character_model.dart';
@@ -379,12 +381,20 @@ class GroupChatService {
         groupModel = active.settings!['groupModel'] as String;
       }
 
+      // iOS guard: if cloud disabled, coerce model to local
+      String effectiveModel = groupModel ?? character.model;
+      if (Platform.isIOS && !EnvConfig.isCloudAiEnabledCached()) {
+        if (!CharacterModel.isLocalModel(effectiveModel)) {
+          effectiveModel = 'local/apple-intelligence';
+        }
+      }
+
       final aiResponse = await HybridChatService.sendMessageToCharacter(
         characterId: characterId,
         message: userMessage,
         systemPrompt: systemPromptWithLanguage,
         chatHistory: contextMessages,
-        model: groupModel ?? character.model,
+        model: effectiveModel,
         localPrompt: character.localPrompt,
       );
 

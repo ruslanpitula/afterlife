@@ -14,6 +14,7 @@ import '../chat/widgets/chat_message_bubble.dart';
 import 'interview_provider.dart';
 import 'file_processor_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/utils/env_config.dart';
 
 class InterviewScreen extends StatefulWidget {
   final bool editMode;
@@ -34,12 +35,15 @@ class _InterviewScreenState extends State<InterviewScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _inputFocusNode = FocusNode();
   late InterviewProvider _interviewProvider;
-  bool _isProcessingFile = false;
+  bool _isProcessingFile = false; 
+  bool _useLocalOnIOS = true;
   
 
   @override
   void initState() {
     super.initState();
+    // Initialize the local/cloud toggle before provider so the welcome message can reflect it
+    _useLocalOnIOS = !(EnvConfig.isCloudAiEnabledCached());
     _initializeProvider();
     // Set focus to the input field after a short delay
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -68,12 +72,16 @@ class _InterviewScreenState extends State<InterviewScreen> {
     final languageProvider = context.read<LanguageProvider>();
     _interviewProvider.setLanguageProvider(languageProvider);
 
-    // Set the initial welcome message in the user's preferred language
+    // Set the initial welcome message (cloud mode offers Interview or File options)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final localizations = AppLocalizations.of(context);
-      _interviewProvider.setInitialMessage(
-        localizations.interviewWelcomeMessage,
-      );
+      String initial;
+      if (Platform.isIOS && EnvConfig.isCloudAiEnabledCached() && !_useLocalOnIOS) {
+        initial = "Choose how to create your character:\n\n• Start an interview (just begin chatting)\n• Or tap the upload icon to create from files";
+      } else {
+        initial = localizations.interviewWelcomeMessage;
+      }
+      _interviewProvider.setInitialMessage(initial);
     });
 
     // If editing an existing character, initialize with their data
@@ -101,12 +109,16 @@ class _InterviewScreenState extends State<InterviewScreen> {
         _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
+      // Show stop button and disable input while processing
+      _interviewProvider.startThinking();
+
       final files = await FileProcessorService.pickFile();
       if (files == null || files.isEmpty) {
         setState(() {
           _interviewProvider.addAIMessage(localizations.noFilesSelected);
           _isProcessingFile = false;
         });
+        _interviewProvider.finishThinking();
         return;
       }
 
@@ -165,6 +177,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
         "I'm sorry, but I encountered an error processing your file(s): ${e.toString()}",
       );
     } finally {
+      _interviewProvider.finishThinking();
       setState(() => _isProcessingFile = false);
     }
   }
@@ -193,6 +206,62 @@ class _InterviewScreenState extends State<InterviewScreen> {
             ),
           ),
           actions: [
+            // iOS: Local/Cloud toggle (only shows when Cloud AI can be enabled)
+            if (Platform.isIOS)
+              Row(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _useLocalOnIOS ? Icons.phone_android : Icons.cloud_outlined,
+                          color: Colors.white70,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Switch(
+                          value: _useLocalOnIOS,
+                          onChanged: (v) {
+                            setState(() => _useLocalOnIOS = v);
+                            _interviewProvider.useLocalModel = v || !EnvConfig.isCloudAiEnabledCached();
+                            // Update welcome message dynamically based on mode
+                            final localizations = AppLocalizations.of(context);
+                            String msg;
+                            if (EnvConfig.isCloudAiEnabledCached() && !_useLocalOnIOS) {
+                              msg = "Choose how to create your character:\n\n• Start an interview (just begin chatting)\n• Or tap the upload icon to create from files";
+                            } else {
+                              msg = localizations.interviewWelcomeMessage;
+                            }
+                            _interviewProvider.setOrReplaceInitialMessage(msg);
+                          },
+                          activeColor: AppTheme.warmGold,
+                          inactiveThumbColor: Colors.white70,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // File upload (visible when using Cloud on iOS)
+                  if (EnvConfig.isCloudAiEnabledCached() && !_useLocalOnIOS)
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.upload_file, color: Colors.white70),
+                        onPressed: _isProcessingFile ? null : _handleFileUpload,
+                        tooltip: localizations.uploadCharacterFile,
+                      ),
+                    ),
+                ],
+              ),
             // Creation mode selector: Local vs Cloud
             if (!widget.editMode && !Platform.isIOS)
               Consumer<InterviewProvider>(
@@ -419,7 +488,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                         return const SizedBox.shrink();
                       }
 
-                      return Container(
+                  return Container(
                         padding: ResponsiveUtils.getChatInputPadding(context),
                         decoration: BoxDecoration(
                           color: AppTheme.midnightPurple.withValues(alpha: 0.3),
@@ -436,6 +505,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               child: TextField(
                                 controller: _messageController,
                                 focusNode: _inputFocusNode,
+                                enabled: !provider.isAiThinking,
                                 style: TextStyle(
                                   color: AppTheme.silverMist,
                                   fontSize: 14 * fontScale,

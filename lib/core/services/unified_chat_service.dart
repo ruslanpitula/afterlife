@@ -14,8 +14,8 @@ class UnifiedChatService {
   static const Duration _requestTimeout = Duration(seconds: 120);
 
   // Default models per context (updated to newest OpenRouter models)
-  static const String _defaultGeneralModel = 'anthropic/claude-sonnet-4';
-  static const String _defaultCharacterModel = 'anthropic/claude-sonnet-4';
+  static const String _defaultGeneralModel = 'anthropic/claude-sonnet-4.5';
+  static const String _defaultCharacterModel = 'anthropic/claude-sonnet-4.5';
   static const String _defaultInterviewModel = 'google/gemini-2.5-pro';
 
   static const double _defaultTemperature = 0.7;

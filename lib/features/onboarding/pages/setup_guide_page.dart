@@ -9,6 +9,8 @@ import '../../../core/widgets/api_key_input_dialog.dart';
 import 'dart:io' show Platform;
 import '../../settings/local_llm_settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/env_config.dart';
+import '../../settings/settings_screen.dart';
 
 class SetupGuidePage extends StatelessWidget {
   final AnimationController animationController;
@@ -197,6 +199,13 @@ class SetupGuidePage extends StatelessWidget {
     }
   }
 
+  void _openSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
   Future<void> _openAppleIntelligenceLink(BuildContext context) async {
     final uri = Uri.parse('https://www.apple.com/apple-intelligence/');
     await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -294,7 +303,7 @@ class SetupGuidePage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Local/On-device option: show only on Android to avoid iOS duplication
+                      // Local/On-device option
                       if (!Platform.isIOS)
                         _buildOptionCard(
                           context,
@@ -324,8 +333,8 @@ class SetupGuidePage extends StatelessWidget {
 
                       const SizedBox(height: 16),
 
-                      // Cloud AI Option hidden on iOS
-                      if (!Platform.isIOS)
+                      // Cloud AI Option (on iOS, show only when user enabled Cloud AI)
+                      if (!Platform.isIOS || EnvConfig.isCloudAiEnabledCached())
                         _buildOptionCard(
                           context,
                           title: l10n.cloudAiModels,
@@ -333,25 +342,101 @@ class SetupGuidePage extends StatelessWidget {
                           icon: Icons.cloud,
                           isHighlighted: false,
                           features: [
-                            'Access to GPT-5, Claude, and more',
+                            l10n.accessToGptClaudeAndMore,
                             l10n.advancedReasoningAndKnowledge,
                             l10n.alwaysUpToDateInformation,
                             l10n.fastResponses,
                           ],
                           actionText: l10n.setUpApiKey,
                           onTap: () => _showApiKeyDialog(context),
-                          infoWidget: RichText(
+                          infoWidget: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: l10n.cloudByokOptional + ' ',
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist.withValues(alpha: 0.85),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: l10n.openSettingsLink,
+                                      style: TextStyle(
+                                        color: AppTheme.warmGold,
+                                        fontSize: 12,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      recognizer: TapGestureRecognizer()..onTap = () => _openSettings(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: l10n.getFreeApiKeyAt,
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'openrouter.ai/keys',
+                                      style: TextStyle(
+                                        color: AppTheme.warmGold,
+                                        fontSize: 12,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // iOS helper card when Cloud AI is disabled
+                      if (Platform.isIOS && !EnvConfig.isCloudAiEnabledCached())
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: RichText(
+                            textAlign: TextAlign.center,
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Bring your own key: ',
+                                  text: l10n.cloudDisabledNotice + ' ',
                                   style: TextStyle(
                                     color: AppTheme.silverMist.withValues(alpha: 0.8),
                                     fontSize: 12,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'openrouter.ai/keys',
+                                  text: l10n.openSettingsLink,
+                                  style: TextStyle(
+                                    color: AppTheme.warmGold,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _openSettings(context),
+                                ),
+                                TextSpan(
+                                  text: '. ',
+                                  style: TextStyle(
+                                    color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: l10n.getFreeApiKeyAt + 'openrouter.ai/keys',
                                   style: TextStyle(
                                     color: AppTheme.warmGold,
                                     fontSize: 12,

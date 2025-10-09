@@ -1,13 +1,33 @@
 // Removed unused import
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/ukrainian_font_utils.dart';
-import 'famous_character_prompts.dart';
 import 'famous_character_chat_screen.dart';
-import '../character_gallery/character_gallery_screen.dart';
-import '../../l10n/app_localizations.dart';
-import 'package:afterlife/features/widgets/background_painters.dart';
+import 'famous_character_prompts.dart';
+import '../../core/utils/env_config.dart';
+import '../widgets/background_painters.dart';
+
+class LocalPulseRingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+  LocalPulseRingPainter({required this.progress, required this.color});
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color.withValues(alpha: 0.3 * (1 - progress))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0 * (1 + progress);
+    final double radius = size.width / 2 * (0.8 + progress * 0.2);
+    final Offset center = Offset(size.width / 2, size.height / 2);
+    canvas.drawCircle(center, radius, paint);
+  }
+  @override
+  bool shouldRepaint(LocalPulseRingPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
+  }
+}
 
 class FamousCharacterProfileScreen extends StatefulWidget {
   final String name;
@@ -222,7 +242,7 @@ class _FamousCharacterProfileScreenState
                           return RepaintBoundary(
                             child: CustomPaint(
                               size: const Size(280, 280),
-                              painter: PulseRingPainter(
+                              painter: LocalPulseRingPainter(
                                 progress: _pulseAnimation.value,
                                 color: AppTheme.warmGold,
                               ),
@@ -375,9 +395,8 @@ class _FamousCharacterProfileScreenState
 
               const SizedBox(height: 20),
 
-              // AI Model section (hidden on iOS)
-              if (!Platform.isIOS)
-                Container(
+              // AI Model section (shown on both platforms; _buildModelDropdown handles iOS gating)
+              Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -481,16 +500,72 @@ class _FamousCharacterProfileScreenState
   }
 
   Widget _buildModelDropdown() {
-    // On iOS show only Apple Intelligence
+    // On iOS: show Apple-only unless Cloud AI is enabled. If enabled, show Apple + two API models
     if (Platform.isIOS) {
-      return _buildModelOption(
-        context: context,
-        id: 'local/apple-intelligence',
-        name: 'Apple Intelligence',
-        description: 'On-device Apple Foundation Models',
-        isRecommended: true,
-        isLocal: true,
-        isSelected: true,
+      if (!EnvConfig.isCloudAiEnabledCached()) {
+        return _buildModelOption(
+          context: context,
+          id: 'local/apple-intelligence',
+          name: 'Apple Intelligence',
+          description: 'On-device Apple Foundation Models',
+          isRecommended: true,
+          isLocal: true,
+          isSelected: true,
+        );
+      }
+
+      final models = [
+        {
+          'id': 'local/apple-intelligence',
+          'name': 'Apple Intelligence',
+          'description': 'On-device Apple Foundation Models',
+          'recommended': true,
+          'isLocal': true,
+        },
+        {
+          'id': 'anthropic/claude-sonnet-4.5',
+          'name': 'Claude 4.5 Sonnet',
+          'description': 'Latest Claude with enhanced reasoning and capabilities.',
+          'recommended': false,
+          'isLocal': false,
+        },
+        {
+          'id': 'openai/gpt-5-chat',
+          'name': 'GPT-5 Chat',
+          'description': 'Long-context, strong reasoning and coding. Via OpenRouter.',
+          'recommended': false,
+          'isLocal': false,
+        },
+        {
+          'id': 'google/gemini-2.5-pro',
+          'name': 'Gemini 2.5 Pro',
+          'description': AppLocalizations.of(context).speedMultimodalSupport,
+          'recommended': false,
+          'isLocal': false,
+        },
+        {
+          'id': 'deepseek/deepseek-chat-v3.1:free',
+          'name': 'DeepSeek Chat v3.1 (Free)',
+          'description': 'Free model with solid conversational abilities',
+          'recommended': false,
+          'isLocal': false,
+        },
+      ];
+
+      return Column(
+        children: [
+          ...models.map(
+            (model) => _buildModelOption(
+              context: context,
+              id: model['id'] as String,
+              name: model['name'] as String,
+              description: model['description'] as String,
+              isRecommended: model['recommended'] == true,
+              isLocal: model['isLocal'] == true,
+              isSelected: _selectedModel == model['id'],
+            ),
+          ),
+        ],
       );
     }
     // Get available models for this character (Android)
@@ -525,8 +600,6 @@ class _FamousCharacterProfileScreenState
     bool isLocal = false,
     required bool isSelected,
   }) {
-    final localizations = AppLocalizations.of(context);
-    
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
@@ -545,102 +618,73 @@ class _FamousCharacterProfileScreenState
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            final localizations = AppLocalizations.of(context);
             setState(() {
               _selectedModel = id;
             });
             FamousCharacterPrompts.setSelectedModel(widget.name, id);
-            // Show a confirmation to the user
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(localizations.aiModelUpdatedForCharacter(widget.name)),
-                duration: const Duration(seconds: 2),
+              const SnackBar(
+                content: Text('Model updated'),
               ),
             );
           },
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.all(16),
+            child: Row(
               children: [
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            isSelected
-                                ? AppTheme.warmGold.withValues(alpha: 0.2)
-                                : Colors.black26,
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? AppTheme.warmGold
-                                  : AppTheme.warmGold.withValues(alpha: 0.3),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Icon(
-                        isSelected ? Icons.check : (isLocal ? Icons.phone_android : Icons.psychology_outlined),
-                        color: isLocal ? Colors.blue : AppTheme.warmGold,
-                        size: 16,
-                      ),
-                    ),
-                    Text(
-                      name,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    if (!Platform.isIOS && isRecommended)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppTheme.warmGold.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          localizations.recommended,
-                          style: TextStyle(
-                            color: AppTheme.warmGold,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    // Hide PRIVATE pill on iOS
-                    if (!Platform.isIOS && isLocal)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          localizations.private,
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                  ],
+                Icon(
+                  isLocal ? Icons.phone_android : Icons.cloud,
+                  color: isLocal ? Colors.green : AppTheme.warmGold,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  description,
-                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          if (isRecommended)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.warmGold.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'RECOMMENDED',
+                                style: TextStyle(
+                                  color: AppTheme.warmGold,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

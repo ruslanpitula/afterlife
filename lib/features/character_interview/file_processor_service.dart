@@ -1,9 +1,10 @@
-import 'dart:math';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:file_selector/file_selector.dart';
+import 'dart:io' show Platform;
+import '../../core/services/hybrid_chat_service.dart';
+import '../../core/utils/env_config.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'chat_service.dart' as interview_chat;
 import 'prompts.dart';
 
 class FileProcessorService {
@@ -57,7 +58,7 @@ class FileProcessorService {
 
   static Future<String> generateCharacterCard(String content) async {
     try {
-      final response = await interview_chat.ChatService.sendMessage(
+      final response = await HybridChatService.sendMessage(
         messages: [
           {
             "role": "user",
@@ -65,6 +66,12 @@ class FileProcessorService {
           },
         ],
         systemPrompt: InterviewPrompts.fileProcessingSystemPrompt,
+        model: Platform.isIOS && EnvConfig.isCloudAiEnabledCached()
+            ? 'google/gemini-2.5-pro'
+            : null,
+        preferredProvider: Platform.isIOS && !EnvConfig.isCloudAiEnabledCached()
+            ? LLMProvider.local
+            : LLMProvider.openRouter,
       );
 
       if (response == null) {

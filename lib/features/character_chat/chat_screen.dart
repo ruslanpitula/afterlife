@@ -359,14 +359,25 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
           const SizedBox(width: 12),
           // Character name
           Expanded(
-            child: Text(
-              _character!.name,
-              style: UkrainianFontUtils.cinzelWithUkrainianSupport(
-                text: _character!.name,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _character!.name,
+                  style: UkrainianFontUtils.cinzelWithUkrainianSupport(
+                    text: _character!.name,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _modelDisplayName(_character!.model),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -410,6 +421,21 @@ class _CharacterChatScreenState extends State<CharacterChatScreen>
         ),
       ],
     );
+  }
+
+  String _modelDisplayName(String modelId) {
+    switch (modelId) {
+      case 'local/apple-intelligence':
+        return 'Apple Intelligence';
+      case 'anthropic/claude-sonnet-4.5':
+        return 'Claude 4.5 Sonnet';
+      case 'google/gemini-2.5-pro':
+        return 'Gemini 2.5 Pro';
+      case 'openai/gpt-5-chat':
+        return 'GPT-5 Chat';
+      default:
+        return modelId;
+    }
   }
 
   Widget _buildChatList(AppLocalizations localizations) {

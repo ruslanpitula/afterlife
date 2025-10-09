@@ -11,10 +11,12 @@ class EnvConfig {
 
   // Keys for SharedPreferences
   static const String _openRouterApiKeyPref = 'user_openrouter_api_key';
+  static const String _cloudAiEnabledPref = 'user_cloud_ai_enabled';
 
   /// Cache for the user API key to avoid sync/async issues
   static String? _cachedUserApiKey;
   static String? _cachedHuggingFaceToken;
+  static bool _cachedCloudAiEnabled = false;
 
   /// Initialize environment configuration
   static Future<void> initialize() async {
@@ -38,6 +40,7 @@ class EnvConfig {
         // Get API key from SharedPreferences (user setting)
         final prefs = await PreferencesService.getPrefs();
         _cachedUserApiKey = prefs.getString(_openRouterApiKeyPref);
+        _cachedCloudAiEnabled = prefs.getBool(_cloudAiEnabledPref) ?? false;
 
         // Read HF token from .env
         _cachedHuggingFaceToken = dotenv.maybeGet('HUGGINGFACE_TOKEN');
@@ -62,6 +65,9 @@ class EnvConfig {
     }
     if (key == 'HUGGINGFACE_TOKEN') {
       return _cachedHuggingFaceToken;
+    }
+    if (key == 'CLOUD_AI_ENABLED') {
+      return _cachedCloudAiEnabled ? 'true' : 'false';
     }
 
     // Return null for any other key if not found
@@ -92,6 +98,32 @@ class EnvConfig {
       if (kDebugMode) {
         AppLogger.error('Error saving API key', tag: 'EnvConfig', error: e);
       }
+      return false;
+    }
+  }
+
+  /// Cloud AI enabled flag (persisted)
+  static Future<bool> setCloudAiEnabled(bool enabled) async {
+    try {
+      final prefs = await PreferencesService.getPrefs();
+      await prefs.setBool(_cloudAiEnabledPref, enabled);
+      _cachedCloudAiEnabled = enabled;
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        AppLogger.error('Error saving cloud AI enabled flag', tag: 'EnvConfig', error: e);
+      }
+      return false;
+    }
+  }
+
+  static bool isCloudAiEnabledCached() => _cachedCloudAiEnabled;
+
+  static Future<bool> isCloudAiEnabled() async {
+    try {
+      final prefs = await PreferencesService.getPrefs();
+      return prefs.getBool(_cloudAiEnabledPref) ?? false;
+    } catch (_) {
       return false;
     }
   }
@@ -134,6 +166,7 @@ class EnvConfig {
       AppLogger.debug('HF Token from .env: $hfDisplay', tag: 'EnvConfig');
       final hasKey = await hasUserApiKey();
       AppLogger.debug('Has user API key in SharedPreferences: $hasKey', tag: 'EnvConfig');
+      AppLogger.debug('Cloud AI enabled (cached): $_cachedCloudAiEnabled', tag: 'EnvConfig');
       AppLogger.debug('--------------------------', tag: 'EnvConfig');
     }
   }
