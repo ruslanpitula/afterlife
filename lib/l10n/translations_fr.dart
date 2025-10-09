@@ -14,7 +14,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get create => 'Créer';
 
   @override
-  String get settings => 'Paramètres';
+  String get settings => 'Réglages';
 
   @override
   String get exploreDigitalTwins => 'EXPLORER LES JUMEAUX NUMÉRIQUES';
@@ -1451,4 +1451,32 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String failedToDeleteModel(String error) => 'Échec de la suppression du modèle : $error';
+
+  // Cloud AI BYO key
+  @override
+  String get enableCloudAi => 'Activer l’IA Cloud (OpenRouter)';
+  @override
+  String get enableCloudAiSubtitle => 'Nécessite une clé dans Réglages';
+  @override
+  String get cloudByokOptional => 'Optionnel : utilisez votre propre clé pour activer les modèles cloud.';
+  @override
+  String get openSettingsLink => 'Ouvrir Réglages';
+  @override
+  String get getKeyAtOpenRouter => 'Obtenir une clé sur openrouter.ai/keys';
+  @override
+  String get cloudDisabledNotice => 'Les modèles cloud sont optionnels. Activez l’IA Cloud et ajoutez votre propre clé dans';
+
+  // Interview
+  @override
+  String get interviewCloudEntry => 'Choisissez comment créer votre personnage :\n\n• Démarrer une interview (commencez à discuter)\n• Ou appuyer sur l’icône de téléchargement pour créer à partir de fichiers';
+
+  // Model descriptions
+  @override
+  String get modelClaude45Desc => 'Dernier Claude avec un raisonnement amélioré et plus de capacités.';
+  @override
+  String get modelGpt5Desc => 'Contexte long, excellent raisonnement et code. Via OpenRouter.';
+  @override
+  String get modelGemini25Desc => 'Réponses rapides et de haute qualité avec un bon multimodal.';
+  @override
+  String get modelDeepSeekFreeDesc => 'Modèle gratuit avec de bonnes capacités conversationnelles';
 }

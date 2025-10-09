@@ -616,14 +616,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               {
                 'id': 'anthropic/claude-sonnet-4.5',
                 'name': 'Claude 4.5 Sonnet',
-                'description': 'Latest Claude with enhanced reasoning and capabilities.',
+                'description': localizations.modelClaude45Desc,
                 'provider': 'Anthropic (Cloud via OpenRouter)',
                 'recommended': false,
               },
               {
                 'id': 'openai/gpt-5-chat',
                 'name': 'GPT-5 Chat',
-                'description': 'Long-context, strong reasoning and coding. Via OpenRouter.',
+                'description': localizations.modelGpt5Desc,
                 'provider': 'OpenAI (Cloud via OpenRouter)',
                 'recommended': false,
               },
@@ -637,7 +637,7 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
               {
                 'id': 'deepseek/deepseek-chat-v3.1:free',
                 'name': 'DeepSeek Chat v3.1 (Free)',
-                'description': 'Free model with solid conversational abilities',
+                'description': localizations.modelDeepSeekFreeDesc,
                 'provider': 'DeepSeek (Cloud via OpenRouter)',
                 'free': true,
                 'recommended': false,
@@ -664,14 +664,14 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             {
               'id': 'openai/gpt-5-chat',
               'name': 'GPT-5 Chat',
-              'description': 'Advanced cloud capabilities',
+              'description': localizations.modelGpt5Desc,
               'provider': 'Cloud',
               'recommended': false,
             },
             {
               'id': 'qwen/qwen3-235b-a22b-07-25:free',
               'name': 'Qwen 3 235B (Free)',
-              'description': 'Free model with solid conversational abilities',
+              'description': localizations.modelDeepSeekFreeDesc,
               'provider': 'Cloud',
               'free': true,
               'recommended': false,

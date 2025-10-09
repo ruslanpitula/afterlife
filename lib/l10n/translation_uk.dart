@@ -1186,4 +1186,32 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get learnMoreAboutAppleIntelligence => 'Дізнатися більше про Apple Intelligence';
+
+  // Cloud AI BYO key
+  @override
+  String get enableCloudAi => 'Увімкнути Cloud AI (OpenRouter)';
+  @override
+  String get enableCloudAiSubtitle => 'Потрібен ключ у Налаштуваннях';
+  @override
+  String get cloudByokOptional => 'За бажанням: використайте власний ключ, щоб увімкнути хмарні моделі.';
+  @override
+  String get openSettingsLink => 'Відкрити Налаштування';
+  @override
+  String get getKeyAtOpenRouter => 'Отримайте ключ на openrouter.ai/keys';
+  @override
+  String get cloudDisabledNotice => 'Хмарні моделі — опційні. Увімкніть Cloud AI і додайте власний ключ у';
+
+  // Interview
+  @override
+  String get interviewCloudEntry => 'Оберіть, як створити персонажа:\n\n• Розпочати інтерв’ю (просто почніть спілкування)\n• Або натисніть іконку завантаження, щоб створити з файлів';
+
+  // Model descriptions
+  @override
+  String get modelClaude45Desc => 'Оновлений Claude із покращеним міркуванням і ширшими можливостями.';
+  @override
+  String get modelGpt5Desc => 'Довгий контекст, сильне міркування та код. Через OpenRouter.';
+  @override
+  String get modelGemini25Desc => 'Швидкі та якісні відповіді, потужна мультимодальність.';
+  @override
+  String get modelDeepSeekFreeDesc => 'Безкоштовна модель із добрими розмовними можливостями';
 }

@@ -262,6 +262,14 @@ abstract class AppLocalizations {
   // Link text
   String get learnMoreAboutAppleIntelligence;
 
+  // Cloud AI BYO key (new)
+  String get enableCloudAi; // "Enable Cloud AI (OpenRouter)"
+  String get enableCloudAiSubtitle; // "Requires API key in Settings"
+  String get cloudByokOptional; // "Optional: Bring your own API key to unlock cloud models."
+  String get openSettingsLink; // "Open Settings"
+  String get getKeyAtOpenRouter; // "Get a key at openrouter.ai/keys"
+  String get cloudDisabledNotice; // "Cloud models are optional. Enable Cloud AI and add your own API key in Settings."
+
   // Mask page strings
   String get digitalPersonasWithHistoricalEssence;
   String get einsteinWithMaskAndLLMArmor;
@@ -386,6 +394,7 @@ abstract class AppLocalizations {
 
   // Interview initial message
   String get interviewInitialMessage;
+  String get interviewCloudEntry; // cloud-specific entry message
 
   // Additional methods from Spanish translation that need to be in base class
   String get selectIcon;
@@ -546,6 +555,11 @@ abstract class AppLocalizations {
   String get modelDeletedSuccessfully;
   String get downloadCancelledByUser;
   String get localAiSettingsDescription;
+  // Cloud model descriptions
+  String get modelClaude45Desc;
+  String get modelGpt5Desc;
+  String get modelGemini25Desc;
+  String get modelDeepSeekFreeDesc;
   String failedToLoadSettings(String error);
   String failedToSaveToken(String error);
   String failedToDownloadModel(String error);

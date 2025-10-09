@@ -1347,4 +1347,32 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String failedToDeleteModel(String error) => 'Impossibile eliminare il modello: $error';
+
+  // Cloud AI BYO key
+  @override
+  String get enableCloudAi => 'Abilita Cloud AI (OpenRouter)';
+  @override
+  String get enableCloudAiSubtitle => 'Richiede chiave nelle Impostazioni';
+  @override
+  String get cloudByokOptional => 'Opzionale: porta la tua chiave per sbloccare i modelli cloud.';
+  @override
+  String get openSettingsLink => 'Apri Impostazioni';
+  @override
+  String get getKeyAtOpenRouter => 'Ottieni una chiave su openrouter.ai/keys';
+  @override
+  String get cloudDisabledNotice => 'I modelli cloud sono opzionali. Abilita Cloud AI e aggiungi la tua chiave nelle';
+
+  // Interview
+  @override
+  String get interviewCloudEntry => 'Scegli come creare il tuo personaggio:\n\n• Avvia un’intervista (inizia a chattare)\n• Oppure tocca l’icona di caricamento per creare dai file';
+
+  // Model descriptions
+  @override
+  String get modelClaude45Desc => 'Ultimo Claude con ragionamento migliorato e maggiori capacità.';
+  @override
+  String get modelGpt5Desc => 'Contesto lungo, forte ragionamento e codice. Via OpenRouter.';
+  @override
+  String get modelGemini25Desc => 'Risposte rapide e di alta qualità con forte supporto multimodale.';
+  @override
+  String get modelDeepSeekFreeDesc => 'Modello gratuito con buone capacità conversazionali';
 }

@@ -342,7 +342,7 @@ class SetupGuidePage extends StatelessWidget {
                           icon: Icons.cloud,
                           isHighlighted: false,
                           features: [
-                            'Access to GPT-5, Claude, and more',
+                            l10n.accessToGptClaudeAndMore,
                             l10n.advancedReasoningAndKnowledge,
                             l10n.alwaysUpToDateInformation,
                             l10n.fastResponses,
@@ -356,14 +356,14 @@ class SetupGuidePage extends StatelessWidget {
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: 'Optional: Bring your own API key to unlock cloud models. ',
+                                      text: l10n.cloudByokOptional + ' ',
                                       style: TextStyle(
                                         color: AppTheme.silverMist.withValues(alpha: 0.85),
                                         fontSize: 12,
                                       ),
                                     ),
                                     TextSpan(
-                                      text: 'Open Settings',
+                                      text: l10n.openSettingsLink,
                                       style: TextStyle(
                                         color: AppTheme.warmGold,
                                         fontSize: 12,
@@ -371,13 +371,6 @@ class SetupGuidePage extends StatelessWidget {
                                         fontWeight: FontWeight.w600,
                                       ),
                                       recognizer: TapGestureRecognizer()..onTap = () => _openSettings(context),
-                                    ),
-                                    TextSpan(
-                                      text: ' to manage keys. ',
-                                      style: TextStyle(
-                                        color: AppTheme.silverMist.withValues(alpha: 0.85),
-                                        fontSize: 12,
-                                      ),
                                     ),
                                   ],
                                 ),
@@ -387,7 +380,7 @@ class SetupGuidePage extends StatelessWidget {
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: 'Get a key at ',
+                                      text: l10n.getFreeApiKeyAt,
                                       style: TextStyle(
                                         color: AppTheme.silverMist.withValues(alpha: 0.8),
                                         fontSize: 12,
@@ -419,14 +412,14 @@ class SetupGuidePage extends StatelessWidget {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Cloud models are optional. Enable Cloud AI and add your own API key in ',
+                                  text: l10n.cloudDisabledNotice + ' ',
                                   style: TextStyle(
                                     color: AppTheme.silverMist.withValues(alpha: 0.8),
                                     fontSize: 12,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'Settings',
+                                  text: l10n.openSettingsLink,
                                   style: TextStyle(
                                     color: AppTheme.warmGold,
                                     fontSize: 12,
@@ -443,7 +436,7 @@ class SetupGuidePage extends StatelessWidget {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'Get a key at openrouter.ai/keys',
+                                  text: l10n.getFreeApiKeyAt + 'openrouter.ai/keys',
                                   style: TextStyle(
                                     color: AppTheme.warmGold,
                                     fontSize: 12,

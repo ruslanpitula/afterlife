@@ -1274,4 +1274,32 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String failedToDeleteModel(String error) => '모델 삭제 실패: $error';
+
+  // Cloud AI BYO key
+  @override
+  String get enableCloudAi => '클라우드 AI 활성화 (OpenRouter)';
+  @override
+  String get enableCloudAiSubtitle => '설정에서 API 키가 필요합니다';
+  @override
+  String get cloudByokOptional => '선택 사항: 본인 API 키로 클라우드 모델을 사용할 수 있어요.';
+  @override
+  String get openSettingsLink => '설정 열기';
+  @override
+  String get getKeyAtOpenRouter => 'openrouter.ai/keys 에서 키 받기';
+  @override
+  String get cloudDisabledNotice => '클라우드 모델은 선택 사항입니다. 설정에서 클라우드 AI를 활성화하고 API 키를 추가하세요';
+
+  // Interview
+  @override
+  String get interviewCloudEntry => '캐릭터 생성 방법을 선택하세요:\n\n• 인터뷰 시작 (바로 채팅)\n• 또는 업로드 아이콘을 눌러 파일로 생성';
+
+  // Model descriptions
+  @override
+  String get modelClaude45Desc => '최신 Claude. 향상된 추론과 기능.';
+  @override
+  String get modelGpt5Desc => '긴 컨텍스트, 강력한 추론과 코딩. OpenRouter 경유.';
+  @override
+  String get modelGemini25Desc => '빠르고 고품질의 응답, 강력한 멀티모달.';
+  @override
+  String get modelDeepSeekFreeDesc => '무료 모델, 안정적인 대화 성능';
 }

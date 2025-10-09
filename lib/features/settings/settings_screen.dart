@@ -280,18 +280,18 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
                             setState(() {});
                           },
                           title: Text(
-                            'Enable Cloud AI (OpenRouter)',
+                            localizations.enableCloudAi,
                             style: UkrainianFontUtils.latoWithUkrainianSupport(
-                              text: 'Enable Cloud AI (OpenRouter)',
+                              text: localizations.enableCloudAi,
                               color: AppTheme.silverMist,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           subtitle: Text(
-                            'Requires API key in Settings',
+                            localizations.enableCloudAiSubtitle,
                             style: UkrainianFontUtils.latoWithUkrainianSupport(
-                              text: 'Requires API key in Settings',
+                              text: localizations.enableCloudAiSubtitle,
                               color: AppTheme.silverMist.withValues(alpha: 0.7),
                               fontSize: 13,
                             ),
