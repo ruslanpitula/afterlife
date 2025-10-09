@@ -326,12 +326,26 @@ class _FamousCharacterChatScreenState extends State<FamousCharacterChatScreen> {
                         builder: (context) {
                           // On iOS, hide the dropdown and display a static label
                           if (Theme.of(context).platform == TargetPlatform.iOS) {
-                            // Force Apple Intelligence
-                            if (_selectedModel != 'local/apple-intelligence') {
-                              _selectedModel = 'local/apple-intelligence';
+                            // Show the actual model name selected for this famous character
+                            String modelName;
+                            switch (_selectedModel) {
+                              case 'local/apple-intelligence':
+                                modelName = 'Apple Intelligence';
+                                break;
+                              case 'anthropic/claude-sonnet-4.5':
+                                modelName = 'Claude 4.5 Sonnet';
+                                break;
+                              case 'google/gemini-2.5-pro':
+                                modelName = 'Gemini 2.5 Pro';
+                                break;
+                              case 'openai/gpt-5-chat':
+                                modelName = 'GPT-5 Chat';
+                                break;
+                              default:
+                                modelName = _selectedModel;
                             }
                             return Text(
-                              'Apple Intelligence',
+                              modelName,
                               style: const TextStyle(color: Colors.white70, fontSize: 12),
                               overflow: TextOverflow.ellipsis,
                             );

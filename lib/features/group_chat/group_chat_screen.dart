@@ -13,6 +13,7 @@ import 'widgets/group_chat_message_bubble.dart';
 import 'character_selection_screen.dart';
 import '../providers/characters_provider.dart';
 import '../../features/chat/models/message_status.dart';
+import '../../core/utils/env_config.dart';
 
 class GroupChatScreen extends StatefulWidget {
   final String groupId;
@@ -866,7 +867,7 @@ class _GroupChatScreenState extends State<GroupChatScreen>
     final group = provider.getGroupChatById(widget.groupId);
     if (group == null) return;
 
-    final currentModel = (group.settings?['groupModel'] as String?) ?? 'local/gemma-3-1b-it';
+    final currentModel = (group.settings?['groupModel'] as String?) ?? 'local/apple-intelligence';
     final currentMaxInput = (group.settings?['maxInputChars'] as int?) ?? 400;
     final currentMaxResponse = (group.settings?['maxResponseChars'] as int?) ?? 600;
 
@@ -910,26 +911,35 @@ class _GroupChatScreenState extends State<GroupChatScreen>
                       child: Column(
                         children: [
                           RadioListTile<String>(
-                            value: 'local/gemma-3-1b-it',
+                            value: 'local/apple-intelligence',
                             groupValue: selectedModel,
                             onChanged: (v) => setState(() => selectedModel = v!),
-                            title: const Text('Local Gemma 3 1B', style: TextStyle(color: Colors.white)),
-                            secondary: const Icon(Icons.phone_android, color: Colors.white70),
+                            title: const Text('Apple Intelligence', style: TextStyle(color: Colors.white)),
+                            secondary: const Icon(Icons.phone_iphone, color: Colors.white70),
                           ),
-                          RadioListTile<String>(
-                            value: 'google/gemini-2.5-pro',
-                            groupValue: selectedModel,
-                            onChanged: (v) => setState(() => selectedModel = v!),
-                            title: const Text('Gemini 2.5 Pro', style: TextStyle(color: Colors.white)),
-                            secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
-                          ),
-                          RadioListTile<String>(
-                            value: 'openai/gpt-5-chat',
-                            groupValue: selectedModel,
-                            onChanged: (v) => setState(() => selectedModel = v!),
-                            title: const Text('GPT-5 Chat', style: TextStyle(color: Colors.white)),
-                            secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
-                          ),
+                          if (EnvConfig.isCloudAiEnabledCached()) ...[
+                            RadioListTile<String>(
+                              value: 'anthropic/claude-sonnet-4.5',
+                              groupValue: selectedModel,
+                              onChanged: (v) => setState(() => selectedModel = v!),
+                              title: const Text('Claude 4.5 Sonnet', style: TextStyle(color: Colors.white)),
+                              secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
+                            ),
+                            RadioListTile<String>(
+                              value: 'google/gemini-2.5-pro',
+                              groupValue: selectedModel,
+                              onChanged: (v) => setState(() => selectedModel = v!),
+                              title: const Text('Gemini 2.5 Pro', style: TextStyle(color: Colors.white)),
+                              secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
+                            ),
+                            RadioListTile<String>(
+                              value: 'openai/gpt-5-chat',
+                              groupValue: selectedModel,
+                              onChanged: (v) => setState(() => selectedModel = v!),
+                              title: const Text('GPT-5 Chat', style: TextStyle(color: Colors.white)),
+                              secondary: const Icon(Icons.cloud_outlined, color: Colors.white70),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -995,7 +1005,10 @@ class _GroupChatScreenState extends State<GroupChatScreen>
             ),
             ElevatedButton(
               onPressed: () async {
-                final model = selectedModel;
+                // Coerce to Apple Intelligence when cloud is disabled
+                final model = EnvConfig.isCloudAiEnabledCached()
+                    ? selectedModel
+                    : 'local/apple-intelligence';
                 final maxInput = int.tryParse(inputController.text.trim());
                 final maxResp = int.tryParse(responseController.text.trim());
                 await provider.setGroupModel(widget.groupId, model);

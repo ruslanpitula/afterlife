@@ -10,6 +10,7 @@ import 'dart:io' show Platform;
 import '../../settings/local_llm_settings_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/env_config.dart';
+import '../../settings/settings_screen.dart';
 
 class SetupGuidePage extends StatelessWidget {
   final AnimationController animationController;
@@ -198,6 +199,13 @@ class SetupGuidePage extends StatelessWidget {
     }
   }
 
+  void _openSettings(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
   Future<void> _openAppleIntelligenceLink(BuildContext context) async {
     final uri = Uri.parse('https://www.apple.com/apple-intelligence/');
     await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -341,18 +349,101 @@ class SetupGuidePage extends StatelessWidget {
                           ],
                           actionText: l10n.setUpApiKey,
                           onTap: () => _showApiKeyDialog(context),
-                          infoWidget: RichText(
+                          infoWidget: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Optional: Bring your own API key to unlock cloud models. ',
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist.withValues(alpha: 0.85),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'Open Settings',
+                                      style: TextStyle(
+                                        color: AppTheme.warmGold,
+                                        fontSize: 12,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      recognizer: TapGestureRecognizer()..onTap = () => _openSettings(context),
+                                    ),
+                                    TextSpan(
+                                      text: ' to manage keys. ',
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist.withValues(alpha: 0.85),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Get a key at ',
+                                      style: TextStyle(
+                                        color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'openrouter.ai/keys',
+                                      style: TextStyle(
+                                        color: AppTheme.warmGold,
+                                        fontSize: 12,
+                                        decoration: TextDecoration.underline,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                      recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // iOS helper card when Cloud AI is disabled
+                      if (Platform.isIOS && !EnvConfig.isCloudAiEnabledCached())
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: RichText(
+                            textAlign: TextAlign.center,
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Bring your own key: ',
+                                  text: 'Cloud models are optional. Enable Cloud AI and add your own API key in ',
                                   style: TextStyle(
                                     color: AppTheme.silverMist.withValues(alpha: 0.8),
                                     fontSize: 12,
                                   ),
                                 ),
                                 TextSpan(
-                                  text: 'openrouter.ai/keys',
+                                  text: 'Settings',
+                                  style: TextStyle(
+                                    color: AppTheme.warmGold,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  recognizer: TapGestureRecognizer()..onTap = () => _openSettings(context),
+                                ),
+                                TextSpan(
+                                  text: '. ',
+                                  style: TextStyle(
+                                    color: AppTheme.silverMist.withValues(alpha: 0.8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: 'Get a key at openrouter.ai/keys',
                                   style: TextStyle(
                                     color: AppTheme.warmGold,
                                     fontSize: 12,
@@ -362,22 +453,6 @@ class SetupGuidePage extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()..onTap = () => _openOpenRouterLink(context),
                                 ),
                               ],
-                            ),
-                          ),
-                        ),
-
-                      // iOS helper card when Cloud AI is disabled
-                      if (Platform.isIOS && !EnvConfig.isCloudAiEnabledCached())
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'To use advanced cloud models, enable Cloud AI (OpenRouter) and add your API key in Settings.',
-                            textAlign: TextAlign.center,
-                            style: UkrainianFontUtils.latoWithUkrainianSupport(
-                              text:
-                                  'To use advanced cloud models, enable Cloud AI (OpenRouter) and add your API key in Settings.',
-                              color: AppTheme.silverMist.withValues(alpha: 0.8),
-                              fontSize: 12,
                             ),
                           ),
                         ),

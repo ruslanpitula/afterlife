@@ -78,22 +78,15 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     }
   }
 
-  // Skip index 2 (LLMPage) on iOS entirely
   int get _maxPageIndex => 4;
 
   int _nextIndex(int current) {
     final next = current + 1;
-    if (next == 2 && Theme.of(context).platform == TargetPlatform.iOS) {
-      return 3; // skip LLMPage
-    }
     return next;
   }
 
   int _previousIndex(int current) {
     final prev = current - 1;
-    if (current == 3 && Theme.of(context).platform == TargetPlatform.iOS) {
-      return 1; // when going back from after-skip, land on 1
-    }
     return prev;
   }
 
@@ -219,7 +212,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     // Page indicators
                     Row(
                       children: List.generate(
-                        (Theme.of(context).platform == TargetPlatform.iOS) ? 4 : 5,
+                        5,
                         (index) => Container(
                           margin: const EdgeInsets.symmetric(horizontal: 5),
                           width: 10,
@@ -228,9 +221,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                             shape: BoxShape.circle,
                             color: (
                               () {
-                                final isiOS = Theme.of(context).platform == TargetPlatform.iOS;
-                                final displayIndex = isiOS && _currentPage >= 3 ? _currentPage - 1 : _currentPage;
-                                return displayIndex == index
+                                return _currentPage == index
                                     ? AppTheme.warmGold
                                     : AppTheme.warmGold.withValues(alpha: 0.3);
                               }

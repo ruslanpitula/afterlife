@@ -59,8 +59,8 @@ class _ModelSelectionDialogState extends State<ModelSelectionDialog> {
           // If cloud is enabled and API key exists, also show top cloud models
           if (EnvConfig.isCloudAiEnabledCached()) ...[
             {
-              'id': 'anthropic/claude-sonnet-4',
-              'name': 'Claude 4 Sonnet',
+              'id': 'anthropic/claude-sonnet-4.5',
+              'name': 'Claude 4.5 Sonnet',
               'provider': 'Anthropic',
               'description': 'Latest Claude with enhanced reasoning and capabilities.',
               'recommended': true,

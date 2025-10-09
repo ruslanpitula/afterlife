@@ -109,12 +109,16 @@ class _InterviewScreenState extends State<InterviewScreen> {
         _interviewProvider.addAIMessage(localizations.processingFiles);
         _isProcessingFile = true;
       });
+      // Show stop button and disable input while processing
+      _interviewProvider.startThinking();
+
       final files = await FileProcessorService.pickFile();
       if (files == null || files.isEmpty) {
         setState(() {
           _interviewProvider.addAIMessage(localizations.noFilesSelected);
           _isProcessingFile = false;
         });
+        _interviewProvider.finishThinking();
         return;
       }
 
@@ -173,6 +177,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
         "I'm sorry, but I encountered an error processing your file(s): ${e.toString()}",
       );
     } finally {
+      _interviewProvider.finishThinking();
       setState(() => _isProcessingFile = false);
     }
   }
@@ -483,7 +488,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                         return const SizedBox.shrink();
                       }
 
-                      return Container(
+                  return Container(
                         padding: ResponsiveUtils.getChatInputPadding(context),
                         decoration: BoxDecoration(
                           color: AppTheme.midnightPurple.withValues(alpha: 0.3),
@@ -500,6 +505,7 @@ class _InterviewScreenState extends State<InterviewScreen> {
                               child: TextField(
                                 controller: _messageController,
                                 focusNode: _inputFocusNode,
+                                enabled: !provider.isAiThinking,
                                 style: TextStyle(
                                   color: AppTheme.silverMist,
                                   fontSize: 14 * fontScale,

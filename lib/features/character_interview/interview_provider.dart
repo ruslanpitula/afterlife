@@ -535,6 +535,10 @@ $languageInstruction""";
     notifyListeners();
   }
 
+  /// Public helpers to control thinking state from UI flows (e.g., file processing)
+  void startThinking() => _addLoadingMessage();
+  void finishThinking() => _removeLoadingMessage();
+
   /// Public method to cancel current AI thinking/loading state
   void cancelThinking() {
     _removeLoadingMessage();

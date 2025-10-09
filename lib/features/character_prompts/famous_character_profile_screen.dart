@@ -523,8 +523,8 @@ class _FamousCharacterProfileScreenState
           'isLocal': true,
         },
         {
-          'id': 'anthropic/claude-sonnet-4',
-          'name': 'Claude 4 Sonnet',
+          'id': 'anthropic/claude-sonnet-4.5',
+          'name': 'Claude 4.5 Sonnet',
           'description': 'Latest Claude with enhanced reasoning and capabilities.',
           'recommended': false,
           'isLocal': false,

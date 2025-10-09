@@ -21,10 +21,7 @@ class _LLMPageState extends State<LLMPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Hide this page on iOS for now (we don't show the advanced/basics comparison)
-    if (Platform.isIOS) {
-      return const SizedBox.shrink();
-    }
+    // Show this page on iOS as well (now that Cloud AI is supported via OpenRouter)
     // Create staggered animations with smoother curves
     final titleAnimation = Tween<Offset>(
       begin: const Offset(0, -0.1),

@@ -614,8 +614,8 @@ class _CharacterProfileScreenState extends State<CharacterProfileScreen> {
             },
             if (EnvConfig.isCloudAiEnabledCached()) ...[
               {
-                'id': 'anthropic/claude-sonnet-4',
-                'name': 'Claude 4 Sonnet',
+                'id': 'anthropic/claude-sonnet-4.5',
+                'name': 'Claude 4.5 Sonnet',
                 'description': 'Latest Claude with enhanced reasoning and capabilities.',
                 'provider': 'Anthropic (Cloud via OpenRouter)',
                 'recommended': false,
